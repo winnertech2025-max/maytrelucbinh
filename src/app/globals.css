@@ -1,0 +1,154 @@
+@import "tailwindcss";
+
+:root {
+  --background: #fbfaf7;
+  --foreground: #1c1917;
+  --muted: #78716c;
+  --brand: #2f6b3f;
+  --brand-dark: #1f4b2e;
+  --accent: #c49a5a;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: var(--background);
+  color: var(--foreground);
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+.container-page {
+  width: min(1180px, calc(100% - 32px));
+  margin-inline: auto;
+}
+
+.focus-ring {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+}
+
+.focus-ring:focus-visible {
+  outline-color: var(--accent);
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes soft-pulse {
+  0%,
+  100% {
+    opacity: 0.62;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes route-progress {
+  0% {
+    width: 0%;
+    opacity: 1;
+  }
+  70% {
+    width: 82%;
+    opacity: 1;
+  }
+  100% {
+    width: 100%;
+    opacity: 0;
+  }
+}
+
+@keyframes cart-toast {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes route-card {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.reveal-up {
+  animation: fade-up 620ms ease both;
+}
+
+.reveal-up-delay {
+  animation: fade-up 720ms ease 120ms both;
+}
+
+.skeleton {
+  animation: soft-pulse 1.2s ease-in-out infinite;
+  background: linear-gradient(90deg, #eee9df 0%, #f8f5ef 50%, #eee9df 100%);
+  background-size: 220% 100%;
+}
+
+.route-progress {
+  animation: route-progress 640ms ease-out both;
+}
+
+.animate-cart-toast {
+  animation: cart-toast 220ms ease-out both;
+}
+
+.animate-route-card {
+  animation: route-card 180ms ease-out both;
+}
+
+.hero-reference {
+  background:
+    radial-gradient(circle at 6% 92%, rgba(125, 158, 125, 0.18), transparent 16%),
+    #f7f3ec;
+}
+
+@media (max-width: 767px) {
+  .hero-reference::after {
+    position: absolute;
+    inset: 0;
+    content: "";
+    background: linear-gradient(180deg, rgba(251, 247, 239, 0.97) 0%, rgba(251, 247, 239, 0.9) 58%, rgba(251, 247, 239, 0.22) 100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+}
