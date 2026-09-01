@@ -70,7 +70,17 @@ export const categories: Category[] = [
   },
 ];
 
-export const products: Product[] = (productsSeed as Product[]).map((product) => ({
+const seedProducts = productsSeed as Product[];
+const fallbackProducts = seedProducts.some((product) => product.status === "active")
+  ? seedProducts
+  : seedProducts.slice(0, 12).map((product) => ({
+      ...product,
+      image: "/BannerHero.png",
+      images: ["/BannerHero.png"],
+      status: "active" as const,
+    }));
+
+export const products: Product[] = fallbackProducts.map((product) => ({
   ...product,
   description:
     product.description ||
