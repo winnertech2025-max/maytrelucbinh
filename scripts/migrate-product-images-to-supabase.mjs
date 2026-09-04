@@ -143,7 +143,7 @@ async function downloadImage(imageUrl) {
   for (const candidate of candidates) {
     for (let attempt = 1; attempt <= 3; attempt += 1) {
       try {
-        const response = await requestBuffer(encodeURI(candidate.url), headers, candidate.lookupIp);
+        const response = await requestBuffer(candidate.url, headers, candidate.lookupIp);
         if (response.statusCode < 200 || response.statusCode >= 300) throw new Error(`download ${response.statusCode}`);
 
         const contentType = response.headers["content-type"] || "image/jpeg";
@@ -197,8 +197,9 @@ await ensureBucket();
 
 const { data: products, error } = await supabase
   .from("products")
-  .select("id,slug,image")
+  .select("id,slug,image,status")
   .ilike("image", `%${sourceHost}%`)
+  .eq("status", "active")
   .order("id", { ascending: true });
 
 if (error) throw error;
