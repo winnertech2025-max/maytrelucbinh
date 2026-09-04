@@ -9,6 +9,7 @@
     "lint": "eslint",
     "migrate:product-images": "node scripts/migrate-product-images-to-supabase.mjs",
     "hide:broken-product-images": "node scripts/hide-broken-product-images.mjs",
+    "crawl:products": "node scripts/crawl-maytrelucbinh-aspx.mjs",
     "test:email": "node scripts/test-resend-email.mjs"
   },
   "dependencies": {

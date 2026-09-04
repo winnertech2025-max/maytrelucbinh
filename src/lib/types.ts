@@ -8,7 +8,7 @@ export type Product = {
   images?: string[];
   category: string;
   price: string;
-  salePrice?: string;
+  salePrice?: string | null;
   featured: boolean;
   isNew: boolean;
   description?: string;

@@ -26,7 +26,7 @@ Password demo: `demo-admin-2026`
 
 1. Tạo project Supabase.
 2. Chạy `supabase/schema.sql` trong SQL editor.
-3. Chạy `supabase/seed.sql` để import dữ liệu khi đã có nguồn crawl/backup hợp lệ.
+3. Chạy `supabase/seed.sql` để import dữ liệu sản phẩm đã crawl từ `https://maytrelucbinh.com/trang-chu.aspx`.
 4. Copy `.env.example` thành `.env.local` và điền:
 
 ```bash
@@ -37,7 +37,11 @@ ADMIN_API_KEY=demo-admin-2026
 
 Trang public có mock fallback để dev không bị chết trang khi chưa có DB. Riêng CRUD trong admin dùng Supabase thật và sẽ báo lỗi nếu thiếu env.
 
-Lưu ý ngày 31/08/2026: `maytrelucbinh.com` hiện chỉ trả trang lỗi hosting "Page cannot be displayed", cả HTTP/HTTPS đều không có danh sách sản phẩm thật để crawl. Vì vậy project này đã dựng sẵn code, CMS, schema, luồng mua hàng và brand riêng, nhưng data sản phẩm thật cần crawl lại sau khi domain nguồn hoạt động lại hoặc có file backup từ khách.
+Data hiện tại được crawl từ `https://maytrelucbinh.com/trang-chu.aspx`: 20 danh mục, 373 sản phẩm, 372 sản phẩm active. Nếu khách cập nhật thêm sản phẩm ở web cũ, chạy lại:
+
+```bash
+npm run crawl:products
+```
 
 ## CMS Admin
 
