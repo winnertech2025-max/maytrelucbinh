@@ -85,3 +85,5 @@ npm run migrate:product-images
 ```
 
 Script sẽ tải ảnh đang trỏ `maytrelucbinh.com`, upload lên bucket `product-images`, rồi update lại `products.image` trong Supabase. Ảnh nào link cũ đã 404 sẽ được báo `FAILED` để thay thủ công.
+
+Nếu cần ép về hosting cũ, giữ `OLD_SOURCE_IP=210.211.113.131` trong `.env.local`; script sẽ thử tải ảnh từ IP này với Host header `maytrelucbinh.com`.

@@ -1,5 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import http from "node:http";
+import https from "node:https";
 
 function loadEnvFile(file) {
   if (!existsSync(file)) return;
@@ -22,6 +24,7 @@ const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const serviceRole = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const bucket = process.env.PRODUCT_IMAGE_BUCKET || "product-images";
 const sourceHost = "maytrelucbinh.com";
+const oldSourceIp = process.env.OLD_SOURCE_IP || "210.211.113.131";
 
 if (!url || !serviceRole) {
   console.error("Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY");
@@ -66,12 +69,69 @@ function canonicalImageUrl(imageUrl) {
   return query ? `${cleanPath}?${query}` : cleanPath;
 }
 
+function buildDownloadCandidates(imageUrl) {
+  const urls = [...new Set([imageUrl, canonicalImageUrl(imageUrl)])];
+  const candidates = urls.map((url) => ({ url, lookupIp: "" }));
+
+  if (oldSourceIp) {
+    for (const url of urls) {
+      try {
+        const original = new URL(url);
+        if (!original.hostname.endsWith(sourceHost)) continue;
+        const viaIp = new URL(url);
+        viaIp.protocol = "http:";
+        viaIp.port = "";
+        candidates.push({ url: viaIp.toString(), lookupIp: oldSourceIp });
+      } catch {
+        // Ignore malformed image URLs.
+      }
+    }
+  }
+
+  return candidates;
+}
+
+function requestBuffer(url, headers, lookupIp = "") {
+  return new Promise((resolve, reject) => {
+    const parsed = new URL(url);
+    const client = parsed.protocol === "https:" ? https : http;
+    const request = client.request(
+      parsed,
+      {
+        headers,
+        timeout: 15000,
+        lookup: lookupIp
+          ? (_hostname, options, callback) => {
+              const done = typeof options === "function" ? options : callback;
+              if (options?.all) done(null, [{ address: lookupIp, family: 4 }]);
+              else done(null, lookupIp, 4);
+            }
+          : undefined,
+      },
+      (response) => {
+        const chunks = [];
+        response.on("data", (chunk) => chunks.push(chunk));
+        response.on("end", () => {
+          resolve({
+            statusCode: response.statusCode || 0,
+            headers: response.headers,
+            buffer: Buffer.concat(chunks),
+          });
+        });
+      },
+    );
+    request.on("timeout", () => request.destroy(new Error("download timeout")));
+    request.on("error", reject);
+    request.end();
+  });
+}
+
 async function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 async function downloadImage(imageUrl) {
-  const candidates = [...new Set([imageUrl, canonicalImageUrl(imageUrl)])];
+  const candidates = buildDownloadCandidates(imageUrl);
   const headers = {
     accept: "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
     referer: "http://maytrelucbinh.com/",
@@ -83,16 +143,16 @@ async function downloadImage(imageUrl) {
   for (const candidate of candidates) {
     for (let attempt = 1; attempt <= 3; attempt += 1) {
       try {
-        const response = await fetch(encodeURI(candidate), { headers });
-        if (!response.ok) throw new Error(`download ${response.status}`);
+        const response = await requestBuffer(encodeURI(candidate.url), headers, candidate.lookupIp);
+        if (response.statusCode < 200 || response.statusCode >= 300) throw new Error(`download ${response.statusCode}`);
 
-        const contentType = response.headers.get("content-type") || "image/jpeg";
+        const contentType = response.headers["content-type"] || "image/jpeg";
         if (!contentType.includes("image/")) throw new Error(`invalid content-type ${contentType}`);
 
-        const buffer = Buffer.from(await response.arrayBuffer());
+        const buffer = response.buffer;
         if (buffer.length < 256) throw new Error(`image too small ${buffer.length} bytes`);
 
-        return { buffer, contentType, sourceUrl: candidate };
+        return { buffer, contentType, sourceUrl: candidate.url };
       } catch (error) {
         lastError = error;
         await sleep(250 * attempt);
