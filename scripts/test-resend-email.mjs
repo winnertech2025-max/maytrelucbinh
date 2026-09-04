@@ -20,7 +20,7 @@ loadEnvFile(".env");
 
 const apiKey = process.env.RESEND_API_KEY;
 const from = process.env.ORDER_FROM_EMAIL;
-const to = process.env.ORDER_TO_EMAIL || "maytrelucbinh@gmail.com";
+const to = process.env.ORDER_TO_EMAIL || "ghemaytre1@gmail.com";
 
 if (!apiKey) {
   console.error("Missing RESEND_API_KEY in .env.local");

@@ -56,7 +56,7 @@ export async function POST(request: Request) {
       const resend = new Resend(process.env.RESEND_API_KEY);
       await resend.emails.send({
         from: process.env.ORDER_FROM_EMAIL || "orders@maytrelucbinh.com",
-        to: process.env.ORDER_TO_EMAIL || "maytrelucbinh@gmail.com",
+        to: process.env.ORDER_TO_EMAIL || "ghemaytre1@gmail.com",
         subject: `Đơn hàng mới: ${order.product_name || "Liên hệ chung"}`,
         text: [
           `Khách: ${order.customer_name}`,

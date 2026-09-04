@@ -58,7 +58,7 @@ Form đặt hàng lưu DB trước, sau đó gửi email qua Resend nếu có:
 ```bash
 RESEND_API_KEY=
 ORDER_FROM_EMAIL=orders@maytrelucbinh.com
-ORDER_TO_EMAIL=maytrelucbinh@gmail.com
+ORDER_TO_EMAIL=ghemaytre1@gmail.com
 ```
 
 Test cấu hình Resend sau khi điền key:
