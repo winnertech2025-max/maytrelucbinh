@@ -6,7 +6,7 @@ import { getCategories, getProducts, projects } from "@/lib/data";
 import { asLocale, dict } from "@/lib/i18n";
 import { sitePhone, sitePhoneTel } from "@/lib/site";
 
-export const revalidate = 600;
+export const revalidate = 60;
 
 const tickerItems = [
   "Xưởng sản xuất trực tiếp",
@@ -51,18 +51,18 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           <p className="text-xs font-bold uppercase tracking-[0.35em] text-[#c9dfc9]">
             Xưởng ghế mây · Bình Thạnh, TP HCM
           </p>
-          <h1 className="mt-4 max-w-3xl font-serif text-6xl leading-[1.02] text-white sm:text-7xl md:text-8xl">
+          <h1 className="mt-4 max-w-3xl text-[clamp(3.25rem,7vw,5.8rem)] font-black leading-[1.02] text-white">
             {locale === "vi" ? (
               <>
                 Đan nên
                 <br />
-                <span className="text-[#a9d7ab]">không gian sống</span>
+                <span className="inline-block text-[#a9d7ab]">không gian sống</span>
               </>
             ) : (
               <>
                 Woven
                 <br />
-                <span className="text-[#a9d7ab]">living spaces</span>
+                <span className="inline-block text-[#a9d7ab]">living spaces</span>
               </>
             )}
           </h1>

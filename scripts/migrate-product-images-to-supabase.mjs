@@ -91,6 +91,14 @@ function buildDownloadCandidates(imageUrl) {
   return candidates;
 }
 
+function isSourceUrl(imageUrl) {
+  try {
+    return new URL(imageUrl).hostname.endsWith(sourceHost);
+  } catch {
+    return false;
+  }
+}
+
 function requestBuffer(url, headers, lookupIp = "") {
   return new Promise((resolve, reject) => {
     const parsed = new URL(url);
@@ -175,10 +183,11 @@ async function ensureBucket() {
   }
 }
 
-async function migrateOne(product) {
-  const { buffer, contentType } = await downloadImage(product.image);
-  const ext = extFrom(contentType, product.image);
-  const filePath = `products/${product.id}-${cleanName(product.slug)}.${ext}`;
+async function migrateImageUrl(product, imageUrl, suffix) {
+  const { buffer, contentType } = await downloadImage(imageUrl);
+  const ext = extFrom(contentType, imageUrl);
+  const suffixPart = suffix ? `-${suffix}` : "";
+  const filePath = `products/${product.id}-${cleanName(product.slug)}${suffixPart}.${ext}`;
 
   const upload = await supabase.storage.from(bucket).upload(filePath, buffer, {
     cacheControl: "31536000",
@@ -188,36 +197,66 @@ async function migrateOne(product) {
   if (upload.error) throw upload.error;
 
   const { data } = supabase.storage.from(bucket).getPublicUrl(filePath);
-  const update = await supabase.from("products").update({ image: data.publicUrl }).eq("id", product.id);
-  if (update.error) throw update.error;
   return data.publicUrl;
+}
+
+async function migrateOne(product) {
+  const mainImage = isSourceUrl(product.image) ? await migrateImageUrl(product, product.image, "main") : product.image;
+  const gallery = [];
+  const sourceImages = [...new Set([product.image, ...(product.images || [])].filter(Boolean))];
+
+  for (const [index, imageUrl] of sourceImages.entries()) {
+    try {
+      if (imageUrl === product.image) {
+        gallery.push(mainImage);
+      } else if (isSourceUrl(imageUrl)) {
+        gallery.push(await migrateImageUrl(product, imageUrl, `gallery-${index}`));
+      } else {
+        gallery.push(imageUrl);
+      }
+    } catch (error) {
+      const reason = error instanceof Error ? error.message : String(error);
+      console.warn(`[SKIP GALLERY] ${product.slug}: ${imageUrl} (${reason})`);
+    }
+  }
+
+  const update = await supabase
+    .from("products")
+    .update({ image: mainImage, images: [...new Set(gallery)] })
+    .eq("id", product.id);
+  if (update.error) throw update.error;
+  return mainImage;
 }
 
 await ensureBucket();
 
 const { data: products, error } = await supabase
   .from("products")
-  .select("id,slug,image,status")
-  .ilike("image", `%${sourceHost}%`)
+  .select("id,slug,image,images,status")
   .eq("status", "active")
   .order("id", { ascending: true });
 
 if (error) throw error;
 
-console.log(`Found ${products.length} product images from ${sourceHost}`);
+const sourceProducts = products.filter(
+  (product) => isSourceUrl(product.image) || (product.images || []).some((imageUrl) => isSourceUrl(imageUrl)),
+);
+
+console.log(`Found ${sourceProducts.length} products with images from ${sourceHost}`);
 let ok = 0;
 let failed = 0;
 const failedProducts = [];
 
-for (const product of products) {
+for (const product of sourceProducts) {
   try {
     const publicUrl = await migrateOne(product);
     ok += 1;
-    console.log(`[${ok}/${products.length}] ${product.slug} -> ${publicUrl}`);
+    console.log(`[${ok}/${sourceProducts.length}] ${product.slug} -> ${publicUrl}`);
   } catch (err) {
     failed += 1;
     const reason = err instanceof Error ? err.message : String(err);
     failedProducts.push({ id: product.id, slug: product.slug, image: product.image, reason });
+    await supabase.from("products").update({ status: "inactive" }).eq("id", product.id);
     console.error(`[FAILED] ${product.slug}: ${reason}`);
   }
 }

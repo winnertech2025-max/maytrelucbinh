@@ -8,7 +8,7 @@ import { asLocale, dict } from "@/lib/i18n";
 import { ImageZoom } from "@/components/ImageZoom";
 import { sitePhone, sitePhoneTel } from "@/lib/site";
 
-export const revalidate = 600;
+export const revalidate = 60;
 
 function weave(color: string, opacity: string, scale = 12) {
   return {
@@ -55,7 +55,7 @@ export default async function ProductDetailPage({
             <p className="text-xs font-bold uppercase tracking-[0.22em] text-[#789f78]">
               {t.products}
             </p>
-            <h1 className="mt-3 font-serif text-4xl italic leading-[1.08] tracking-tight text-[#1f5b35] sm:text-5xl">
+            <h1 className="mt-3 text-4xl font-black leading-[1.08] tracking-tight text-[#1f5b35] sm:text-5xl">
               {product.name}
             </h1>
             <div
