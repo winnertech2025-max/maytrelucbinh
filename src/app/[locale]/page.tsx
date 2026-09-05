@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Phone } from "lucide-react";
+import { DragScroll } from "@/components/drag-scroll";
 import { ProductGrid } from "@/components/product-grid";
 import { getCategories, getProducts, projects } from "@/lib/data";
 import { asLocale, dict } from "@/lib/i18n";
@@ -112,7 +113,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           </div>
           <p className="hidden text-sm text-stone-500 sm:block">Kéo ngang để xem thêm →</p>
         </div>
-        <div className="container-page flex gap-4 overflow-x-auto pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <DragScroll className="container-page flex gap-4 overflow-x-auto pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {categories.map((category) => (
             <Link
               key={category.slug}
@@ -131,7 +132,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
               </span>
             </Link>
           ))}
-        </div>
+        </DragScroll>
       </section>
 
       {/* ---------------- PROCESS (genuine sequence, numbered) ---------------- */}

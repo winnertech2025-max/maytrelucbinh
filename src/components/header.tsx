@@ -1,6 +1,9 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import { Mail, MapPin, Menu, Phone, Search, ShoppingCart, X } from "lucide-react";
+import { useRef } from "react";
 import { dict, type Locale } from "@/lib/i18n";
 import { categories } from "@/lib/mock-data";
 import { siteEmail, sitePhone, sitePhoneTel } from "@/lib/site";
@@ -8,6 +11,10 @@ import { siteEmail, sitePhone, sitePhoneTel } from "@/lib/site";
 export function Header({ locale }: { locale: Locale }) {
   const t = dict[locale];
   const otherLocale = locale === "vi" ? "en" : "vi";
+  const menuRef = useRef<HTMLDetailsElement>(null);
+  const closeMenu = () => {
+    if (menuRef.current) menuRef.current.open = false;
+  };
 
   return (
     <header className="sticky top-0 z-40 border-b border-stone-200 bg-[#fbfaf7]/95 backdrop-blur">
@@ -73,27 +80,20 @@ export function Header({ locale }: { locale: Locale }) {
           >
             <ShoppingCart size={18} />
           </Link>
-          {/* <Link
-            className="hidden h-10 items-center gap-2 rounded bg-[#2f6b3f] px-3 text-sm font-semibold text-white sm:flex"
-            href={`/${locale}/admin`}
-          >
-            <ShieldCheck size={16} /> {t.admin}
-          </Link> */}
           <Link className="rounded border border-stone-300 px-3 py-2 text-sm font-bold" href={`/${otherLocale}`}>
             {otherLocale.toUpperCase()}
           </Link>
-          <details className="group relative lg:hidden">
+          <details ref={menuRef} className="group relative lg:hidden">
             <summary className="grid h-10 w-10 cursor-pointer list-none place-items-center rounded border border-stone-300 bg-white" aria-label="Menu">
               <Menu size={19} className="group-open:hidden" />
               <X size={19} className="hidden group-open:block" />
             </summary>
             <nav className="absolute right-0 top-12 grid w-64 gap-1 rounded-md border border-stone-200 bg-white p-3 text-sm font-bold uppercase shadow-xl">
-              <Link className="rounded px-3 py-2 hover:bg-stone-100" href={`/${locale}`}>{t.home}</Link>
-              <Link className="rounded px-3 py-2 hover:bg-stone-100" href={`/${locale}/about`}>{t.about}</Link>
-              <Link className="rounded px-3 py-2 hover:bg-stone-100" href={`/${locale}/products`}>{t.products}</Link>
-              <Link className="rounded px-3 py-2 hover:bg-stone-100" href={`/${locale}/projects`}>{t.projects}</Link>
-              <Link className="rounded px-3 py-2 hover:bg-stone-100" href={`/${locale}/contact`}>{t.contact}</Link>
-              <Link className="rounded px-3 py-2 text-[#2f6b3f] hover:bg-stone-100" href={`/${locale}/admin`}>{t.admin}</Link>
+              <Link onClick={closeMenu} className="rounded px-3 py-2 hover:bg-stone-100" href={`/${locale}`}>{t.home}</Link>
+              <Link onClick={closeMenu} className="rounded px-3 py-2 hover:bg-stone-100" href={`/${locale}/about`}>{t.about}</Link>
+              <Link onClick={closeMenu} className="rounded px-3 py-2 hover:bg-stone-100" href={`/${locale}/products`}>{t.products}</Link>
+              <Link onClick={closeMenu} className="rounded px-3 py-2 hover:bg-stone-100" href={`/${locale}/projects`}>{t.projects}</Link>
+              <Link onClick={closeMenu} className="rounded px-3 py-2 hover:bg-stone-100" href={`/${locale}/contact`}>{t.contact}</Link>
             </nav>
           </details>
         </div>
